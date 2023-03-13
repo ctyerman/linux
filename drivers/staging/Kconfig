@@ -80,4 +80,7 @@ source "drivers/staging/qlge/Kconfig"
 
 source "drivers/staging/vme_user/Kconfig"
 
+source "drivers/staging/ioplus_rpi/Kconfig"
+
+
 endif # STAGING
