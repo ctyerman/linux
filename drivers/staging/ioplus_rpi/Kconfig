@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 config IOPLUS_RPI
-	tristate "ioplus_rpi - Home Automation 8-Layer Stackable HAT  for Raspberry Pi"
+	tristate "ioplus_rpi - Home Automation 8-Layer Stackable HAT for Raspberry Pi"
 	depends on I2C
 	help
-	  This option allows you to enable support for the ioplus_rpi.
+		This option allows you to enable support for the ioplus_rpi.
 
 
