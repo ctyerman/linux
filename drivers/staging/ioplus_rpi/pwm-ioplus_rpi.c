@@ -1,3 +1,18 @@
+
+#include <linux/i2c.h>
+#include <linux/module.h>
+#include <linux/regmap.h>
+#include <linux/pwm.h>
+#include <linux/err.h>
+#include <linux/mfd/core.h>
+
+
+
+int ioplus_rpi_pwm_request(struct pwm_chip *chip, struct pwm_device *pwm);
+void ioplus_rpi_pwm_free(struct pwm_chip *chip, struct pwm_device *pwm);
+int ioplus_rpi_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
+		     const struct pwm_state *state);
+
 struct ioplus_rpi_pwm {
 	struct pwm_chip pwm_chip;
 	struct ioplus_rpi *ioplus_rpi;
@@ -5,20 +20,37 @@ struct ioplus_rpi_pwm {
 };
 
 
-static const struct ioplus_rpi_pwm_ops = {
+static const struct pwm_ops ioplus_rpi_pwm_ops = {
 	.request = ioplus_rpi_pwm_request,
 	.free = ioplus_rpi_pwm_free,
 	.apply = ioplus_rpi_pwm_apply,
 	.owner = THIS_MODULE,
+};
 
+int ioplus_rpi_pwm_request(struct pwm_chip *chip, struct pwm_device *pwm)
+{
+
+	return 0;
+}
+
+void ioplus_rpi_pwm_free(struct pwm_chip *chip, struct pwm_device *pwm)
+{
 
 }
 
+int ioplus_rpi_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
+		     const struct pwm_state *state)
+{
+	return 0;
+}
+
+
+
 static int ioplus_rpi_pwm_probe(struct platform_device *pdev)
 {
-	struct ioplus_rpi *ioplus_rpi = dev_get_drvdata(pdev->dev.parent);
+	//struct ioplus_rpi *ioplus_rpi = dev_get_drvdata(pdev->dev.parent);
 	struct ioplus_rpi_pwm *pwm;
-    int ret = 0 
+    int ret = 0;
 
 	pwm = devm_kzalloc(&pdev->dev, sizeof(*pwm), GFP_KERNEL);
 	if (!pwm)
@@ -32,7 +64,7 @@ static int ioplus_rpi_pwm_probe(struct platform_device *pdev)
 
     platform_set_drvdata(pdev, pwm);
 
-    ret = devm_pwmchip_add(&pdev->dev,*pwm->pwm_chip);
+    ret = devm_pwmchip_add(&pdev->dev,&pwm->pwm_chip);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
 		return ret;

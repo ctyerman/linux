@@ -51,7 +51,7 @@ const struct regmap_config ioplus_rpi_regmap_config = {
 	.writeable_reg = ioplus_rpi_is_writeable_reg,
 	.volatile_reg = ioplus_rpi_is_volatile_reg,
 };
-
+EXPORT_SYMBOL_GPL(ioplus_rpi_regmap_config);
 
 /*
  * MFD cells
