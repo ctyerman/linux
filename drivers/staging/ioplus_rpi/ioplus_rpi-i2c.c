@@ -18,15 +18,18 @@
 
 static int ioplus_rpi_i2c_probe(struct i2c_client *client)
 {
-	struct ioplus_rpi *ioplus = devm_kmalloc(&client->dev, sizeof(*ioplus_rpi), GFP_KERNEL);
+	struct ioplus_rpi *ioplus;
+
+	ioplus = devm_kmalloc(&client->dev, sizeof(*ioplus), GFP_KERNEL);
 	if (!ioplus)
 		return -ENOMEM;
 
-    // add switch if other varients needed
-    const struct regmap_config = &ioplus_rpi_regmap_config;
+    // add switch if other variants needed
+    struct regmap_config *regmap_conf;
+	regmap_conf = (struct regmap_config *)&ioplus_rpi_regmap_config;
  
     i2c_set_clientdata(client, ioplus);
-    ioplus->regmap = devm_regmap_init_i2c(client, regmap_config);
+    ioplus->regmap = devm_regmap_init_i2c(client, regmap_conf);
 
 	if (IS_ERR(ioplus->regmap))
     {
@@ -34,10 +37,11 @@ static int ioplus_rpi_i2c_probe(struct i2c_client *client)
 		return PTR_ERR(ioplus->regmap);
     }
 
-    ioplus->client = client;
+    ioplus->i2c_client = client;
 
-	ioplus_rpi_common_init(ioplus)
+	ioplus_rpi_common_init(ioplus);
 
+	return 0;
 }
 
 static void ioplus_rpi_i2c_remove(struct i2c_client *client)
@@ -54,22 +58,22 @@ static const struct of_device_id ioplus_rpi_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, ioplus_rpi_dt_ids);
 
 static const struct i2c_device_id ioplus_rpi_i2c_id_table[] = {
-	{ .compatible = "ioplus_rpi", 0},
+	{ "ioplus_rpi", 0},
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, ioplus_rpi_i2c_id_table);
 
-static const struct acpi_device_id ioplus_rpi_acpi_ids[] = {
+static const struct acpi_device_id ioplus_rpi_i2c_acpi_ids[] = {
 	{ .id = "ioplus_rpi", 0},
 	{ }
 };
-MODULE_DEVICE_TABLE(acpi, rpi_i2c_acpi_ids);
+MODULE_DEVICE_TABLE(acpi, ioplus_rpi_i2c_acpi_ids);
 
 static struct i2c_driver ioplus_rpi_i2c_driver = {
 	.driver = {
 		.name = "ioplus_rpi",
 		.of_match_table = ioplus_rpi_dt_ids,
-        .acpi_match_table = ioplus_rpi_acpi_ids,
+        .acpi_match_table = ioplus_rpi_i2c_acpi_ids,
 	},
 	.probe_new  = ioplus_rpi_i2c_probe,
     .remove		= ioplus_rpi_i2c_remove,

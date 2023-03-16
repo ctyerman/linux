@@ -1,15 +1,13 @@
 /* SPDX-License-Identifier: GPL-2.0 */
+#ifndef IOPLUS_RPI_H_
+#define IOPLUS_RPI_H_
+
 #include <linux/bitops.h>
 #include <linux/device.h>
 #include <linux/regmap.h>
 #include <linux/i2c.h>
 
-/* Regmap configurations */
-extern const struct regmap_config ioplus_rpi_regmap_config;
 
-
-/* Probe called from different transports */
-int ioplus_rpi_common_probe(struct ioplus_rpi *ioplus);
 
 
 /* */
@@ -33,6 +31,9 @@ int ioplus_rpi_common_probe(struct ioplus_rpi *ioplus);
 #define GPIO_STS_MASK			0x01
 #define GPIO_SET_MASK			0x01
 
+#define RELAY_CFG_MASK			0x01
+#define RELAY_STS_MASK			0x01
+#define RELAY_SET_MASK			0x01
 
 
 
@@ -116,7 +117,15 @@ struct ioplus_rpi {
     uint pwm_count;
 
 
-}
+};
+/* Regmap configurations */
 
+extern const struct regmap_config ioplus_rpi_regmap_config;
+
+
+/* init called from different transports */
+int ioplus_rpi_common_init(struct ioplus_rpi *ioplus);
+
+int ioplus_rpi_common_exit(struct ioplus_rpi *ioplus);
 
 #endif  /* IOPLUS_RPI_H_ */

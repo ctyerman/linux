@@ -1,4 +1,4 @@
-/ SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: GPL-2.0
 /*
  * GPIO driver for SequentMicrosystems ioplus-rpi
  *
@@ -8,7 +8,7 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 
-#include <linux/mfd/ioplus_rpi.h>
+#include "ioplus_rpi.h"
 
 struct ioplus_rpi_gpio {
 	struct gpio_chip gpio_chip;
