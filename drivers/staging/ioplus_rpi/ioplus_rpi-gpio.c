@@ -8,7 +8,8 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 
-#include "ioplus_rpi.h"
+#include "ioplus_rpi-core.h"
+
 
 struct ioplus_rpi_gpio {
 	struct gpio_chip gpio_chip;
@@ -104,7 +105,6 @@ static int ioplus_rpi_gpio_probe(struct platform_device *pdev)
 	gpio->gpio_chip.parent = ioplus_rpi->dev;
 
 	return devm_gpiochip_add_data(&pdev->dev, &gpio->gpio_chip, gpio);
-
     
 }
 

@@ -13,15 +13,16 @@
 #include <linux/iio/sysfs.h>
 #include <linux/err.h>
 #include <linux/mfd/core.h>
+#include <linux/platform_device.h>
 
-#include "ioplus_rpi.h"
+#include "ioplus_rpi-core.h"
 
 
 
 static bool ioplus_rpi_is_volatile_reg(struct device *dev, unsigned int reg)
 {
 	switch (reg) {
-	case IOPLUS_RPI_REG_HUMIDITY_LSB:
+	case IOPLUS_RPI_MEM_GPIO_VAL_ADD:
 
 		return true;
 	default:
@@ -32,7 +33,7 @@ static bool ioplus_rpi_is_volatile_reg(struct device *dev, unsigned int reg)
 static bool ioplus_rpi_is_writeable_reg(struct device *dev, unsigned int reg)
 {
 	switch (reg) {
-	case IOPLUS_RPI_REG_CMD:
+	case IOPLUS_RPI_MEM_GPIO_VAL_ADD:
 
 		return true;
 	default:
@@ -60,52 +61,66 @@ static struct mfd_cell ioplus_rpi_gpio_cells[] = {
  {	.name = "ioplus_rpi-gpio", },
  {	.name = "ioplus_rpi-relay", },
  { 	.name = "ioplus_rpi-iio", },
-{ 	.name = "ioplus_rpi-pwm", },
-  
+ { 	.name = "ioplus_rpi-pwm", },
 };
 
-
-
-
+/*
 static int ioplus_rpi_add_device(struct ioplus_rpi *ioplus,
 			       struct mfd_cell *cell)
 {
 	cell->platform_data = ioplus;
 	cell->pdata_size = sizeof(*ioplus);
 
-	return mfd_add_devices(&ioplus_rpi->client->dev,
+	return mfd_add_devices(&ioplus->i2c_client->dev,
 			       PLATFORM_DEVID_AUTO, cell, 1, NULL, 0, NULL);
 }
+*/
 
 static struct ioplus_rpi_platform_data *ioplus_rpi_parse_dt(struct device *dev)
 {
 	struct device_node *np = dev->of_node;
+	//struct device_node *child;
 	struct ioplus_rpi_platform_data *pdata;
-	struct device_node *child;
+
+
+
 
 	if (!np)
 		return ERR_PTR(-EINVAL);
 
-	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+	pdata = devm_kzalloc(dev, sizeof(pdata), GFP_KERNEL);
 	if (!pdata)
 		return ERR_PTR(-ENOMEM);
 
 	return pdata;
 }
 
+static int ioplus_rpi_startup(struct ioplus_rpi *ioplus)
+{
 
 
 
-static int ioplus_rpi_common_init(struct ioplus_rpi *ioplus)
+	return 0;
+}
+
+
+
+
+
+
+int ioplus_rpi_common_init(struct ioplus_rpi *ioplus)
 {
     struct ioplus_rpi_platform_data     *pdata;
-	struct i2c_client					*client = ioplus->client;
-	struct regmap  						*regmap = ioplus->regmap;
+    struct i2c_client					*client = ioplus->i2c_client;
+
+    //struct platform_device 				*pdev;
+	//struct regmap  						*regmap = ioplus->regmap;
+
 	int ret;
 
 
     pdata = dev_get_platdata(&client->dev);
-	struct platform_device *pdev;
+
 
 	if (!pdata)
 		pdata = ioplus_rpi_parse_dt(&client->dev);
@@ -114,11 +129,11 @@ static int ioplus_rpi_common_init(struct ioplus_rpi *ioplus)
 		return PTR_ERR(pdata);
 	}
 
-    ioplus_rpi->pdata = pdata;
+    ioplus->pdata = pdata;
 
   
 
-    ret = ioplus_rpi_startup(ioplus_rpi);
+    ret = ioplus_rpi_startup(ioplus);
 	if (ret) {
 		dev_err(&client->dev, "initialization failed\n");
 		return ret;
@@ -145,9 +160,11 @@ static int ioplus_rpi_common_init(struct ioplus_rpi *ioplus)
 }
 EXPORT_SYMBOL_GPL(ioplus_rpi_common_init);
 
-ioplus_rpi_common_exit(struct ioplus_rpi *ioplus)
+int ioplus_rpi_common_exit(struct ioplus_rpi *ioplus)
 {
-	mfd_remove_devices(ioplus->client->dev);
+	mfd_remove_devices(&ioplus->i2c_client->dev);
+
+	return 0;
 }
 EXPORT_SYMBOL_GPL(ioplus_rpi_common_exit);
 

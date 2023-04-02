@@ -1,8 +1,34 @@
 # SPDX-License-Identifier: GPL-2.0
 config IOPLUS_RPI
 	tristate "ioplus_rpi - Home Automation 8-Layer Stackable HAT for Raspberry Pi"
-	depends on I2C
+	select MFD_CORE
+	select REGMAP
+	select IOPLUS_RPI_I2C
 	help
 		This option allows you to enable support for the ioplus_rpi.
 
+config IOPLUS_RPI_I2C
+	tristate "ioplus_rpi with I2C"
+	depends on IOPLUS_RPI
+	select REGMAP_I2C
+	  
+config IOPLUS_RPI_IIO
+	tristate "ioplus_rpi IIO support"
+	depends on IOPLUS_RPI
+	select IIO
 
+config IOPLUS_RPI_PWM
+	tristate "ioplus_rpi PWM driver"
+	depends on IOPLUS_RPI	  
+	select PWM
+
+config IOPLUS_RPI_RELAY
+	tristate "ioplus_rpi RELAY driver"
+	depends on IOPLUS_RPI	  
+
+config IOPLUS_RPI_GPIO
+	tristate "ioplus_rpi GPIO driver"
+	depends on IOPLUS_RPI	  
+
+	  
+	  
