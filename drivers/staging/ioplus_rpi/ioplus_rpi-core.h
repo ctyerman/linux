@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 */
-#ifndef IOPLUS_RPI_H_
-#define IOPLUS_RPI_H_
+#ifndef IOPLUS_RPI_CORE_H_
+#define IOPLUS_RPI_CORE_H_
 
 #include <linux/bitops.h>
 #include <linux/device.h>
@@ -101,11 +101,18 @@
 #define IOPLUS_RPI_MEM_GPIO_ENC_COUNT_END_ADD   0xd3
 #define IOPLUS_RPI_SLAVE_BUFF_SIZE              0xd4
 
+struct ioplus_rpi_platform_data {
+
+};
+
+
 
 struct ioplus_rpi {
 	struct device *dev;
 	struct i2c_client *i2c_client;
 	struct regmap *regmap;
+	struct ioplus_rpi_platform_data *pdata;
+
 
     uint adc_count;    
     uint dac_count;

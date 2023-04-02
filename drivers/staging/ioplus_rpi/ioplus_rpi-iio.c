@@ -14,7 +14,7 @@
 #include <linux/err.h>
 #include <linux/mfd/core.h>
 
-#include "ioplus_rpi.h"
+#include "ioplus_rpi-core.h"
 
 
 static int ioplus_rpi_read_raw(struct iio_dev *indio_dev,
@@ -106,7 +106,7 @@ static int ioplus_rpi_read_voltage(struct ioplus_rpi_iio_data *data, int val)
 
 
 	uint tval;
-	regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_MV_ADD + 2* (data->channel - 1) ,&tval);
+	ret = regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_MV_ADD + 2* (data->channel - 1) ,&tval);
 
 	val = be32_to_cpu(tval);
 
@@ -121,7 +121,7 @@ static int ioplus_rpi_read_voltage_raw(struct ioplus_rpi_iio_data *data, int val
 
 
 	uint tval;
-	regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_RAW_ADD + 2* (data->channel - 1) ,&tval);
+	ret = regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_RAW_ADD + 2* (data->channel - 1) ,&tval);
 
 	val = be32_to_cpu(tval);
 
@@ -136,7 +136,7 @@ static int ioplus_rpi_read_count_raw(struct ioplus_rpi_iio_data *data, int val)
 
 
 	uint tval;
-	regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_RAW_ADD + 2* (data->channel - 1) ,&tval);
+	ret = regmap_read(regmap, IOPLUS_RPI_MEM_ADC_VAL_RAW_ADD + 2* (data->channel - 1) ,&tval);
 
 	val = be32_to_cpu(tval);
 
@@ -153,7 +153,7 @@ static int ioplus_rpi_write_voltage(struct ioplus_rpi_iio_data *data, int val)
 	unsigned int tval;
 	tval = cpu_to_be32(val);
 
-	regmap_write(regmap, IOPLUS_RPI_MEM_DAC_VAL_MV_ADD + 2* (data->channel - 1) ,tval);
+	ret = regmap_write(regmap, IOPLUS_RPI_MEM_DAC_VAL_MV_ADD + 2* (data->channel - 1) ,tval);
 
 
 
@@ -211,9 +211,15 @@ static int ioplus_rpi_write_raw(struct iio_dev *indio_dev,
 	case IIO_CHAN_INFO_RAW:
 		switch (chan->type) {
 		case IIO_VOLTAGE:
-			if (chan->output)
+		{
+			if (chan->output == 1) {
 				return ioplus_rpi_write_voltage(data, val);
-
+			}
+			else
+			{
+				return -EINVAL;
+			}
+		}
 		default:
 			return -EINVAL;
 		}
@@ -253,7 +259,7 @@ int ioplus_rpi_add_iio_dev(struct platform_device *pdev, struct
 static int ioplus_rpi_iio_probe(struct platform_device *pdev)
 {
 	struct ioplus_rpi 		*ioplus = dev_get_drvdata(pdev->dev.parent);
-    struct ioplus_rpi_board *pdata = dev_get_platdata(ioplus->dev);
+    //struct ioplus_rpi_board *pdata = dev_get_platdata(ioplus->dev);
 	struct regmap 			*regmap = ioplus->regmap;
 
 	// add adcs
@@ -261,7 +267,7 @@ static int ioplus_rpi_iio_probe(struct platform_device *pdev)
 	{
 		int ret;
 		
-		const char name[8]; 
+		char name[8];
 		snprintf(name,8,"adc%d",i);
 		ret = ioplus_rpi_add_iio_dev(pdev, ioplus_rpi_adc_channels,
 				ARRAY_SIZE(ioplus_rpi_adc_channels), regmap, name, i);
@@ -273,7 +279,7 @@ static int ioplus_rpi_iio_probe(struct platform_device *pdev)
 	{
 		int ret;
 		
-		const char name[8]; 
+		char name[8];
 		snprintf(name,8,"dac%d",i);
 		ret = ioplus_rpi_add_iio_dev(pdev, ioplus_rpi_dac_channels,
 				ARRAY_SIZE(ioplus_rpi_dac_channels), regmap, name, i);
@@ -285,7 +291,7 @@ static int ioplus_rpi_iio_probe(struct platform_device *pdev)
 	{
 		int ret;
 		
-		const char name[8]; 
+		char name[8];
 		snprintf(name,8,"opto%d",i);
 		ret = ioplus_rpi_add_iio_dev(pdev, ioplus_rpi_opto_channels,
 				ARRAY_SIZE(ioplus_rpi_opto_channels), regmap, name, i);
@@ -297,7 +303,7 @@ static int ioplus_rpi_iio_probe(struct platform_device *pdev)
 	{
 		int ret;
 		
-		const char name[15]; 
+		char name[15];
 		snprintf(name,15,"quadrature%d",i);
 		ret = ioplus_rpi_add_iio_dev(pdev, ioplus_rpi_quadrature_channels,
 				ARRAY_SIZE(ioplus_rpi_quadrature_channels), regmap, name, i);

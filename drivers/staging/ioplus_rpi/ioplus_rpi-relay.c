@@ -8,8 +8,8 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 
+#include "ioplus_rpi-core.h"
 
-#include "ioplus_rpi.h"
 
 struct ioplus_rpi_relay {
 	struct gpio_chip relay_chip;

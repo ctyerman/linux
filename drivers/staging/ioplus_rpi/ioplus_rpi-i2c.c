@@ -14,18 +14,19 @@
 #include <linux/err.h>
 #include <linux/mfd/core.h>
 
-#include "ioplus_rpi.h"
+#include "ioplus_rpi-core.h"
 
 static int ioplus_rpi_i2c_probe(struct i2c_client *client)
 {
-	struct ioplus_rpi *ioplus;
+	struct ioplus_rpi 			*ioplus;
+    struct regmap_config 		*regmap_conf;
 
 	ioplus = devm_kmalloc(&client->dev, sizeof(*ioplus), GFP_KERNEL);
 	if (!ioplus)
 		return -ENOMEM;
 
     // add switch if other variants needed
-    struct regmap_config *regmap_conf;
+
 	regmap_conf = (struct regmap_config *)&ioplus_rpi_regmap_config;
  
     i2c_set_clientdata(client, ioplus);
