@@ -24,6 +24,7 @@ static bool ioplus_rpi_is_volatile_reg(struct device *dev, unsigned int reg)
 	switch (reg) {
 	case IOPLUS_RPI_MEM_GPIO_VAL_ADD:
 	case IOPLUS_RPI_MEM_GPIO_DIR_ADD:
+	case IOPLUS_RPI_MEM_RELAY_VAL_ADD:
 
 		return true;
 	default:
@@ -51,7 +52,7 @@ const struct regmap_config ioplus_rpi_regmap_config = {
 	.val_bits = 8,
 
 	.max_register = IOPLUS_RPI_SLAVE_BUFF_SIZE,
-	.cache_type = REGCACHE_RBTREE,
+	.cache_type = REGCACHE_NONE,
 
 	.writeable_reg = ioplus_rpi_is_writeable_reg,
 	.volatile_reg = ioplus_rpi_is_volatile_reg,

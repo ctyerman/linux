@@ -7,7 +7,7 @@
 #include <linux/gpio/driver.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-
+#include <linux/err.h>
 #include "ioplus_rpi-core.h"
 
 
@@ -26,7 +26,7 @@ static int ioplus_rpi_gpio_get_direction(struct gpio_chip *gc,
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
 	//  pin not avaliable on (STM32G030C8T6) hardware version 3 
-	if (gpio->ioplus_rpi->hw_version == 3 && offset == 2)
+	if (gpio->ioplus_rpi->pdata->hw_major == 3 && offset == 2)
 		return -ENOSYS;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
@@ -36,7 +36,7 @@ static int ioplus_rpi_gpio_get_direction(struct gpio_chip *gc,
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 	printk(KERN_ALERT "direction value %d in function %s\n", val, __func__);
 
-	if (ret)
+	if (ret < 0)
 		return ret;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
@@ -70,7 +70,12 @@ static int ioplus_rpi_gpio_direction_input(struct gpio_chip *gc, unsigned offset
 	printk(KERN_ALERT "mask is %x, in function %s\n\n", update_mask, __func__);
 
 	ret = regmap_update_bits(gpio->ioplus_rpi->regmap, IOPLUS_RPI_MEM_GPIO_DIR_ADD,
-				  update_mask, GPIO_LINE_DIRECTION_IN);
+				  update_mask, (GPIO_LINE_DIRECTION_IN << offset));
+
+
+	if (ret < 0)
+		return ret;
+
 
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 
@@ -89,7 +94,7 @@ static int ioplus_rpi_gpio_direction_output(struct gpio_chip *gc,
 
 
 	//  pin not avaliable on (STM32G030C8T6) hardware version 3 
-	if (gpio->ioplus_rpi->hw_version == 3 && offset == 2)
+	if (gpio->ioplus_rpi->pdata->hw_major == 3 && offset == 2)
 		return -ENOSYS;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
@@ -105,24 +110,24 @@ static int ioplus_rpi_gpio_direction_output(struct gpio_chip *gc,
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
 	ret = regmap_update_bits(gpio->ioplus_rpi->regmap, IOPLUS_RPI_MEM_GPIO_DIR_ADD,
-				  update_mask, GPIO_LINE_DIRECTION_OUT);
+				  update_mask, (GPIO_LINE_DIRECTION_OUT << offset));
 
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 
-        if (ret)
-                return ret;
+	if (ret <0 )
+		return ret;
 
 	// set value
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 
 	ret = regmap_update_bits(gpio->ioplus_rpi->regmap, IOPLUS_RPI_MEM_GPIO_VAL_ADD,
-			   update_mask, value ? GPIO_SET_MASK : 0);
+			   update_mask, ((value & GPIO_SET_MASK) << offset));
 
         printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 
-        if (ret)
-                return ret;
+	if (ret <0 )
+		return ret;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
@@ -141,7 +146,7 @@ static int ioplus_rpi_gpio_get(struct gpio_chip *gc, unsigned offset)
 
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
 
-	if (ret)
+	if (ret <0 )
 		return ret;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
@@ -161,12 +166,11 @@ static void ioplus_rpi_gpio_set(struct gpio_chip *gc, unsigned offset,
 {
 	struct ioplus_rpi_gpio *gpio = gpiochip_get_data(gc);
 	int ret;
+	uint bit_mask;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
-
-
-	uint bit_mask = (GPIO_SET_MASK << offset);
+	bit_mask = (GPIO_SET_MASK << offset);
 
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
@@ -175,12 +179,9 @@ static void ioplus_rpi_gpio_set(struct gpio_chip *gc, unsigned offset,
 	printk(KERN_ALERT "bitmask is %d, in function %s\n", bit_mask, __func__);
 
 	ret = regmap_update_bits(gpio->ioplus_rpi->regmap, IOPLUS_RPI_MEM_GPIO_VAL_ADD,
-			   bit_mask, value ? GPIO_SET_MASK : 0);
+			   bit_mask, ((value & GPIO_SET_MASK) << offset));
 
 	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
-
-	if (ret)
-                return ret;
 
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);

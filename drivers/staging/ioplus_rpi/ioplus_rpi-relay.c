@@ -37,8 +37,10 @@ static int ioplus_rpi_relay_get(struct gpio_chip *gc, unsigned offset)
         printk(KERN_ALERT "value is %d, in function %s\n", val, __func__);
         printk(KERN_ALERT "offset is %d, in function %s\n", offset, __func__);
 
-	if (ret)
+	if (ret < 0)
 		return ret;
+
+
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
@@ -55,11 +57,25 @@ static void ioplus_rpi_relay_set(struct gpio_chip *gc, unsigned offset,
 			      int value)
 {
 	struct ioplus_rpi_relay *relay = gpiochip_get_data(gc);
+	uint update_mask;
+	int ret;
 
 	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
-	regmap_update_bits(relay->ioplus_rpi->regmap, IOPLUS_RPI_MEM_RELAY_VAL_ADD,
-			   RELAY_SET_MASK << offset, value ? RELAY_SET_MASK : 0);
+	update_mask = GPIO_SET_MASK << offset;
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+	printk(KERN_ALERT "\nvalue is %x, in function %s\n", value, __func__);
+	printk(KERN_ALERT "offset is %x, in function %s\n", offset, __func__);
+	printk(KERN_ALERT "mask is %x, in function %s\n\n", update_mask, __func__);
+
+	ret = regmap_update_bits(relay->ioplus_rpi->regmap, IOPLUS_RPI_MEM_RELAY_VAL_ADD,
+			update_mask, (( value & RELAY_SET_MASK) << offset));
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+	printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
+
+
 }
 
 static const struct gpio_chip template_chip = {
