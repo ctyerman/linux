@@ -6,11 +6,8 @@
  */
 
 #include <linux/i2c.h>
-#include <linux/iio/iio.h>
 #include <linux/module.h>
 #include <linux/regmap.h>
-#include <linux/iio/iio.h>
-#include <linux/iio/sysfs.h>
 #include <linux/err.h>
 #include <linux/mfd/core.h>
 
@@ -18,27 +15,39 @@
 
 static int ioplus_rpi_i2c_probe(struct i2c_client *client)
 {
-	struct ioplus_rpi 			*ioplus;
-    struct regmap_config 		*regmap_conf;
+	struct device			*dev = &client->dev;
+	struct ioplus_rpi 		*ioplus;
+	struct regmap_config 		*regmap_conf;
 
-	ioplus = devm_kmalloc(&client->dev, sizeof(*ioplus), GFP_KERNEL);
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+	ioplus = devm_kzalloc(dev, sizeof(*ioplus), GFP_KERNEL);
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
 	if (!ioplus)
 		return -ENOMEM;
 
-    // add switch if other variants needed
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+	// add switch if other variants needed
 
 	regmap_conf = (struct regmap_config *)&ioplus_rpi_regmap_config;
- 
-    i2c_set_clientdata(client, ioplus);
-    ioplus->regmap = devm_regmap_init_i2c(client, regmap_conf);
+
+	i2c_set_clientdata(client, ioplus);
+	ioplus->regmap = devm_regmap_init_i2c(client, regmap_conf);
 
 	if (IS_ERR(ioplus->regmap))
-    {
+	{
 		dev_err(&client->dev, "failed to allocate register map\n");
 		return PTR_ERR(ioplus->regmap);
-    }
+	}
 
-    ioplus->i2c_client = client;
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+    	ioplus->i2c_client = client;
+	ioplus->dev = &client->dev;
 
 	ioplus_rpi_common_init(ioplus);
 
@@ -76,9 +85,9 @@ static struct i2c_driver ioplus_rpi_i2c_driver = {
 		.of_match_table = ioplus_rpi_dt_ids,
         .acpi_match_table = ioplus_rpi_i2c_acpi_ids,
 	},
-	.probe_new  = ioplus_rpi_i2c_probe,
-    .remove		= ioplus_rpi_i2c_remove,
-	.id_table   = ioplus_rpi_i2c_id_table,
+	.probe_new	= ioplus_rpi_i2c_probe,
+	.remove		= ioplus_rpi_i2c_remove,
+	.id_table	= ioplus_rpi_i2c_id_table,
 };
 module_i2c_driver(ioplus_rpi_i2c_driver);
 

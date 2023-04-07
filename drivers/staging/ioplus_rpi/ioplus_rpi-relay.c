@@ -19,7 +19,9 @@ struct ioplus_rpi_relay {
 static int ioplus_rpi_relay_get_direction(struct gpio_chip *gc,
 				       unsigned offset)
 {
-		return GPIO_LINE_DIRECTION_OUT;
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+	return GPIO_LINE_DIRECTION_OUT;
 }
 
 static int ioplus_rpi_relay_get(struct gpio_chip *gc, unsigned offset)
@@ -27,12 +29,24 @@ static int ioplus_rpi_relay_get(struct gpio_chip *gc, unsigned offset)
 	struct ioplus_rpi_relay *relay = gpiochip_get_data(gc);
 	int ret, val;
 
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
 	ret = regmap_read(relay->ioplus_rpi->regmap, IOPLUS_RPI_MEM_RELAY_VAL_ADD, &val);
+
+        printk(KERN_ALERT "return is %d, in function %s\n", ret, __func__);
+        printk(KERN_ALERT "value is %d, in function %s\n", val, __func__);
+        printk(KERN_ALERT "offset is %d, in function %s\n", offset, __func__);
+
 	if (ret)
 		return ret;
 
-	if (val & RELAY_STS_MASK << offset)
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+
+	if (val & (RELAY_STS_MASK << offset))
 		return 1;
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
 	return 0;
 }
@@ -41,6 +55,8 @@ static void ioplus_rpi_relay_set(struct gpio_chip *gc, unsigned offset,
 			      int value)
 {
 	struct ioplus_rpi_relay *relay = gpiochip_get_data(gc);
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
 	regmap_update_bits(relay->ioplus_rpi->regmap, IOPLUS_RPI_MEM_RELAY_VAL_ADD,
 			   RELAY_SET_MASK << offset, value ? RELAY_SET_MASK : 0);
@@ -64,13 +80,21 @@ static int ioplus_rpi_relay_probe(struct platform_device *pdev)
 	struct ioplus_rpi *ioplus_rpi = dev_get_drvdata(pdev->dev.parent);
 	struct ioplus_rpi_relay *relay;
 
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
 	relay = devm_kzalloc(&pdev->dev, sizeof(*relay), GFP_KERNEL);
 	if (!relay)
 		return -ENOMEM;
 
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
+
+
 	relay->ioplus_rpi = dev_get_drvdata(pdev->dev.parent);
 	relay->relay_chip = template_chip;
 	relay->relay_chip.parent = ioplus_rpi->dev;
+
+	printk(KERN_ALERT "reached line %d in function %s\n", __LINE__, __func__);
 
 	return devm_gpiochip_add_data(&pdev->dev, &relay->relay_chip, relay);
 

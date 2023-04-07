@@ -103,6 +103,11 @@
 
 struct ioplus_rpi_platform_data {
 
+	uint hw_major;
+	uint hw_minor;
+	uint major;
+	uint minor;
+
 };
 
 
@@ -114,14 +119,16 @@ struct ioplus_rpi {
 	struct ioplus_rpi_platform_data *pdata;
 
 
-    uint adc_count;    
-    uint dac_count;
-    uint opto_count;
-    uint quadrature_count;
 
-    uint gpio_count;
-    uint relay_count;
-    uint pwm_count;
+
+	uint adc_count;
+	uint dac_count;
+	uint opto_count;
+	uint quadrature_count;
+
+	uint gpio_count;
+	uint relay_count;
+	uint pwm_count;
 
 
 };
