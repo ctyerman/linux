@@ -78,6 +78,8 @@ static void ioplus_rpi_relay_set(struct gpio_chip *gc, unsigned offset,
 
 }
 
+static const char* const def_names[] = {"RL1","RL2","RL3","RL4","RL5","RL6","RL7","RL8"};
+
 static const struct gpio_chip template_chip = {
 	.label			= "ioplus_rpi-relay",
 	.owner			= THIS_MODULE,
@@ -89,6 +91,7 @@ static const struct gpio_chip template_chip = {
 	.base			= -1,
 	.ngpio			= 8,
 	.can_sleep		= true,
+	.names			= def_names,
 };
 
 static int ioplus_rpi_relay_probe(struct platform_device *pdev)

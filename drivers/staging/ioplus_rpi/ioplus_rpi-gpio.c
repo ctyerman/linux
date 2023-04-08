@@ -189,6 +189,23 @@ static void ioplus_rpi_gpio_set(struct gpio_chip *gc, unsigned offset,
 
 }
 
+static const char* const def_names[] = {"GP1","GP2","GP3","GP4"};
+
+
+static int ioplus_rpi_init_valid_mask(struct gpio_chip *gc,
+						   unsigned long *valid_mask,
+						   unsigned int ngpios)
+{
+	struct ioplus_rpi_gpio *gpio = gpiochip_get_data(gc);
+
+        //  pin 3 not avaliable on (STM32G030C8T6) hardware version 3
+        if (gpio->ioplus_rpi->pdata->hw_major == 3)
+	{
+		*valid_mask = 0xB;
+	}
+	return 0;
+};
+
 static const struct gpio_chip template_chip = {
 	.label			= "ioplus_rpi-gpio",
 	.owner			= THIS_MODULE,
@@ -197,9 +214,11 @@ static const struct gpio_chip template_chip = {
 	.direction_output	= ioplus_rpi_gpio_direction_output,
 	.get			= ioplus_rpi_gpio_get,
 	.set			= ioplus_rpi_gpio_set,
+	.init_valid_mask	= ioplus_rpi_init_valid_mask,
 	.base			= -1,
 	.ngpio			= 4,
 	.can_sleep		= true,
+	.names			= def_names,
 };
 
 static int ioplus_rpi_gpio_probe(struct platform_device *pdev)
